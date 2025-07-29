@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>traverseDockWidgetBase</class>
+ <widget class="QDockWidget" name="traverseDockWidgetBase">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>429</width>
+    <height>651</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Traverse</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="finishButton">
+        <property name="text">
+         <string>Finish</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="newButton">
+        <property name="text">
+         <string>New</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizonalLayout">
+      <item>
+       <widget class="QLabel" name="layerLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Layers</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QgsMapLayerComboBox" name="mapLayerComboBox"/>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item alignment="Qt::AlignRight">
+       <widget class="QToolButton" name="hamburgerButton">
+        <property name="contextMenuPolicy">
+         <enum>Qt::ActionsContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>icons/Three-bars-01.svg</normaloff>icons/Three-bars-01.svg</iconset>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QToolBar" name="toolbar">
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+        <property name="floatable">
+         <bool>false</bool>
+        </property>
+        <addaction name="actionStart"/>
+        <addaction name="actionClose"/>
+        <addaction name="actionTraceLines"/>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QTableWidget" name="tableWidget">
+        <column>
+         <property name="text">
+          <string>Direction</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Distance</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Radius</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Arc Length</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <action name="actionStart">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/mActionCapturePoint.png</normaloff>icons/mActionCapturePoint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set Start</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the location of the start point of the traverse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/mActionCapturePoint.png</normaloff>icons/mActionCapturePoint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set Closing</string>
+   </property>
+   <property name="toolTip">
+    <string>Set Closing</string>
+   </property>
+  </action>
+  <action name="actionTraceLines">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/mActionCaptureLine.png</normaloff>icons/mActionCaptureLine.png</iconset>
+   </property>
+   <property name="text">
+    <string>Trace Lines</string>
+   </property>
+   <property name="toolTip">
+    <string>Trace Lines</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/mActionFileSave.png</normaloff>icons/mActionFileSave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import</string>
+   </property>
+   <property name="toolTip">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/mActionFileOpen.png</normaloff>icons/mActionFileOpen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

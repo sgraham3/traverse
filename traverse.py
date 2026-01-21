@@ -63,8 +63,8 @@ class traverse:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&traverse')
-        self.toolbar = self.iface.addToolBar(u'traverse')
+        self.menu = self.tr(u'&Traverse')
+        self.toolbar = self.iface.pluginToolBar()
         self.toolbar.setObjectName(u'traverse')
 
         self.pluginIsActive = False
@@ -195,12 +195,9 @@ class traverse:
 
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&traverse'),
+                self.tr(u'&Traverse'),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        if self.toolbar: # Check if toolbar exists before deleting it
-            del self.toolbar
 
         # Ensure dockwidget is also cleaned up if it's still present when the plugin unloads
         if self.dockwidget:

@@ -1,3 +1,0 @@
-A traverse is a sequence of lines that is defined by entering a set of dimensions. Start a traverse by clicking Traverse on the plugin toobar.
-
-A traverse is commonly used to create linear features described on a survey or engineering plan. A survey plan is used by surveyors and engineers to record the location of features relative to each other using dimensions and coordinates. Surveyors and engineers record the locations of features such as parcel boundaries, road centerlines, and utility easements. For example, the survey plan shown below uses dimensions to describe a road centerline and the parcel boundaries adjoining the road (offset from the centerline). The road centerline and parcel boundaries comprise a number of straight and curved lines.

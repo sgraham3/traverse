@@ -166,7 +166,7 @@ class traverse:
 
         # IMPORTANT: Use the correct path for your icon as defined in resources.qrc
         # Assuming your icons are in a folder named 'icons' and prefix is 'plugins/traverse'
-        icon_path = ':/plugins/traverse/icons/Three-bars-01.svg' # Changed to use one of your specific icons 
+        icon_path = ':/plugins/traverse/icons/surveying-icon.svg' # New surveying icon 
         self.add_action(
             icon_path,
             text=self.tr(u'Traverse'),

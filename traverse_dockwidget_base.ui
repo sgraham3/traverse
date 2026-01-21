@@ -129,11 +129,11 @@
     </item>
    </layout>
   </widget>
-  <action name="actionStart">
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/mActionCapturePoint.png</normaloff>icons/mActionCapturePoint.png</iconset>
-   </property>
+   <action name="actionStart">
+    <property name="icon">
+     <iconset>
+      <normaloff>icons/capture-point.svg</normaloff>icons/capture-point.svg</iconset>
+    </property>
    <property name="text">
     <string>Set Start</string>
    </property>
@@ -141,11 +141,11 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the location of the start point of the traverse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
-  <action name="actionClose">
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/mActionCapturePoint.png</normaloff>icons/mActionCapturePoint.png</iconset>
-   </property>
+   <action name="actionClose">
+    <property name="icon">
+     <iconset>
+      <normaloff>icons/capture-point.svg</normaloff>icons/capture-point.svg</iconset>
+    </property>
    <property name="text">
     <string>Set Closing</string>
    </property>
@@ -153,11 +153,11 @@
     <string>Set Closing</string>
    </property>
   </action>
-  <action name="actionTraceLines">
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/mActionCaptureLine.png</normaloff>icons/mActionCaptureLine.png</iconset>
-   </property>
+   <action name="actionTraceLines">
+    <property name="icon">
+     <iconset>
+      <normaloff>icons/capture-line.svg</normaloff>icons/capture-line.svg</iconset>
+    </property>
    <property name="text">
     <string>Trace Lines</string>
    </property>
@@ -165,11 +165,11 @@
     <string>Trace Lines</string>
    </property>
   </action>
-  <action name="actionImport">
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/mActionFileSave.png</normaloff>icons/mActionFileSave.png</iconset>
-   </property>
+   <action name="actionImport">
+    <property name="icon">
+     <iconset>
+      <normaloff>icons/file-open.svg</normaloff>icons/file-open.svg</iconset>
+    </property>
    <property name="text">
     <string>Import</string>
    </property>
@@ -177,11 +177,11 @@
     <string>Import</string>
    </property>
   </action>
-  <action name="actionExport">
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/mActionFileOpen.png</normaloff>icons/mActionFileOpen.png</iconset>
-   </property>
+   <action name="actionExport">
+    <property name="icon">
+     <iconset>
+      <normaloff>icons/file-save.svg</normaloff>icons/file-save.svg</iconset>
+    </property>
    <property name="text">
     <string>Export</string>
    </property>

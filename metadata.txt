@@ -5,15 +5,15 @@
 [general]
 name=Traverse
 qgisMinimumVersion=3.0
-description=Traverse
-version=0.1
+description=A QGIS plugin for creating and managing traverse surveys with point setting, line tracing, and data import/export functionality.
+version=1.0
 author=gemini
 email=ai@web.com
 
-about=Traverse
+about=This plugin allows users to create traverse surveys in QGIS by setting start and closing points, tracing lines interactively, and drawing traverse segments on vector layers. Supports importing/exporting traverse data from/to text files.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/example/traverse/issues
+repository=https://github.com/example/traverse
 # End of mandatory metadata
 
 # Recommended items:
@@ -23,10 +23,10 @@ hasProcessingProvider=no
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags=gis, survey, traverse, vector, mapping
 
-homepage=http://homepage
-category=Plugins
+homepage=https://github.com/example/traverse
+category=Vector
 icon=icon.png
 # experimental flag
 experimental=False

@@ -19,6 +19,24 @@ from qgis.core import (
 from qgis.core import QgsMapLayerProxyModel
 from qgis.core import Qgis  # Import Qgis for message levels
 
+try:
+    from .esri_traverse import (
+        EsriTraverseParser,
+        DirectionType,
+        DirectionUnits,
+        bearing_to_azimuth,
+        azimuth_to_bearing,
+    )
+except ImportError:
+    # Fallback for when not running as a package
+    from esri_traverse import (
+        EsriTraverseParser,
+        DirectionType,
+        DirectionUnits,
+        bearing_to_azimuth,
+        azimuth_to_bearing,
+    )
+
 
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "traverse_dockwidget_base.ui")
@@ -917,120 +935,189 @@ class traverseDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def import_data(self):
         """
-        Opens a file dialog to select a data file (e.g., CSV, TXT)
-        and populates the table widget with the imported data.
-        This version is updated to handle 'DD' lines from 'import.txt'.
+        Opens a file dialog to select a traverse file and populates the table widget.
+        Supports Esri ArcGIS Pro traverse file format with DT, DU, DD, AD, TC, and NC courses.
         """
         file_dialog = QtWidgets.QFileDialog()
         file_path, _ = file_dialog.getOpenFileName(
             self,
             "Import Traverse Data",
             "",
-            "All Files (*.*); CSV Files (*.csv); Text Files (*.txt)",
+            "Text Files (*.txt)",
         )
 
-        if file_path:
-            self.iface.messageBar().pushMessage(
-                "Traverse Plugin",
-                f"Attempting to import data from: {file_path}",
-                level=Qgis.Info,
-            )
-            self.tableWidget.setRowCount(0)
+        if not file_path:
+            return
 
-            try:
-                with open(file_path, "r") as f:
-                    for line_num, line in enumerate(f, 1):
-                        parts = line.strip().split(" ")
+        self.iface.messageBar().pushMessage(
+            "Traverse Plugin",
+            f"Importing traverse data from: {os.path.basename(file_path)}",
+            level=Qgis.Info,
+        )
+        self.tableWidget.setRowCount(0)
 
-                        if not parts:
-                            continue
+        try:
+            # Use the Esri traverse parser
+            parser = EsriTraverseParser()
+            if not parser.parse_file(file_path):
+                # Show errors
+                for error in parser.errors:
+                    self.iface.messageBar().pushCritical("Traverse Plugin", error)
+                return
 
-                        line_type = parts[0].upper()
+            # Show warnings if any
+            for warning in parser.warnings:
+                self.iface.messageBar().pushWarning("Traverse Plugin", warning)
 
-                        if line_type == "DD" and len(parts) >= 3:
-                            try:
-                                direction = parts[1].strip()
-                                distance = float(parts[2].strip())
-                                radius = 0.0
-                                arc_length = 0.0
-                                self.add_traverse_segment(
-                                    direction, distance, radius, arc_length
-                                )
-                            except ValueError:
-                                self.iface.messageBar().pushWarning(
-                                    "Traverse Plugin",
-                                    f"Skipping line {line_num}: Malformed numeric data for DD. Line: '{line.strip()}'",
-                                )
-                            except Exception as e:
-                                self.iface.messageBar().pushCritical(
-                                    "Traverse Plugin",
-                                    f"Error processing DD line {line_num}: {e}. Line: '{line.strip()}'",
-                                )
-                        elif line_type == "SP" and len(parts) >= 3:
-                            try:
-                                x = float(parts[1].strip())
-                                y = float(parts[2].strip())
-                                self.start_point = QgsPointXY(x, y)
-                                self.iface.messageBar().pushMessage(
-                                    "Traverse Plugin",
-                                    f"Start point set from file: {self.start_point.toString()}",
-                                    level=Qgis.Info,
-                                )
-                            except ValueError:
-                                self.iface.messageBar().pushWarning(
-                                    "Traverse Plugin",
-                                    f"Skipping line {line_num}: Malformed numeric data for SP. Line: '{line.strip()}'",
-                                )
-                            except Exception as e:
-                                self.iface.messageBar().pushCritical(
-                                    "Traverse Plugin",
-                                    f"Error processing SP line {line_num}: {e}. Line: '{line.strip()}'",
-                                )
-                        elif line_type == "EP" and len(parts) >= 3:
-                            try:
-                                x = float(parts[1].strip())
-                                y = float(parts[2].strip())
-                                self.closing_point = QgsPointXY(x, y)
-                                self.iface.messageBar().pushMessage(
-                                    "Traverse Plugin",
-                                    f"Closing point set from file: {self.closing_point.toString()}",
-                                    level=Qgis.Info,
-                                )
-                            except ValueError:
-                                self.iface.messageBar().pushWarning(
-                                    "Traverse Plugin",
-                                    f"Skipping line {line_num}: Malformed numeric data for EP. Line: '{line.strip()}'",
-                                )
-                            except Exception as e:
-                                self.iface.messageBar().pushCritical(
-                                    "Traverse Plugin",
-                                    f"Error processing EP line {line_num}: {e}. Line: '{line.strip()}'",
-                                )
-                        elif line_type in ["DT", "DU"]:
-                            self.iface.messageBar().pushMessage(
-                                "Traverse Plugin",
-                                f"Skipping line {line_num}: Unit/Type definition not handled in this version. Line: '{line.strip()}'",
-                                level=Qgis.Info,
-                            )
-                        else:
-                            self.iface.messageBar().pushWarning(
-                                "Traverse Plugin",
-                                f"Skipping line {line_num}: Unrecognized format or incomplete data. Line: '{line.strip()}'",
-                            )
-
+            # Set start and end points
+            if parser.start_point:
+                self.start_point = QgsPointXY(
+                    parser.start_point[0], parser.start_point[1]
+                )
                 self.iface.messageBar().pushMessage(
                     "Traverse Plugin",
-                    f"Successfully imported data from {os.path.basename(file_path)}.",
+                    f"Start point: {self.start_point.toString()}",
                     level=Qgis.Info,
                 )
-            except FileNotFoundError:
-                self.iface.messageBar().pushCritical(
-                    "Traverse Plugin", f"File not found: {file_path}"
+
+            if parser.end_point:
+                self.closing_point = QgsPointXY(
+                    parser.end_point[0], parser.end_point[1]
                 )
-            except Exception as e:
-                self.iface.messageBar().pushCritical(
-                    "Traverse Plugin", f"An error occurred during import: {e}"
+                self.iface.messageBar().pushMessage(
+                    "Traverse Plugin",
+                    f"Closing point: {self.closing_point.toString()}",
+                    level=Qgis.Info,
                 )
+
+            # Process courses
+            for course in parser.courses:
+                if course.course_type == "DD":
+                    # Direction-distance course
+                    self.add_traverse_segment(
+                        course.direction, course.distance, 0.0, 0.0
+                    )
+                elif course.course_type == "AD":
+                    # Angle-distance course (relative to previous segment)
+                    # For now, we'll store as direction-distance with angle info in direction field
+                    # This will need proper handling in the drawing logic
+                    angle_str = self._format_angle_from_decimal(
+                        course.angle_offset, parser.direction_units
+                    )
+                    self.add_traverse_segment(
+                        f"AD:{angle_str}", course.distance, 0.0, 0.0
+                    )
+                elif course.course_type == "TC":
+                    # Tangent curve
+                    radius = self._calculate_radius_from_curve(
+                        course.curve_measure_type,
+                        course.curve_measure_value,
+                        course.curve_angle_type,
+                        course.curve_angle_value,
+                    )
+                    arc_length = self._calculate_arc_length_from_curve(
+                        course.curve_measure_type,
+                        course.curve_measure_value,
+                        course.curve_angle_type,
+                        course.curve_angle_value,
+                        radius,
+                    )
+                    self.add_traverse_segment(
+                        "TC:*",  # TC tangent indicator
+                        arc_length,
+                        radius,
+                        arc_length,
+                    )
+                elif course.course_type == "NC":
+                    # Nontangent curve
+                    direction = course.curve_direction_value or "N0-0-0E"
+                    radius = self._calculate_radius_from_curve(
+                        course.curve_measure_type,
+                        course.curve_measure_value,
+                        course.curve_angle_type,
+                        course.curve_angle_value,
+                    )
+                    arc_length = self._calculate_arc_length_from_curve(
+                        course.curve_measure_type,
+                        course.curve_measure_value,
+                        course.curve_angle_type,
+                        course.curve_angle_value,
+                        radius,
+                    )
+                    self.add_traverse_segment(
+                        f"NC:{direction}", arc_length, radius, arc_length
+                    )
+
+            self.iface.messageBar().pushMessage(
+                "Traverse Plugin",
+                f"Successfully imported {len(parser.courses)} courses from {os.path.basename(file_path)}.",
+                level=Qgis.Info,
+            )
+
+        except Exception as e:
+            self.iface.messageBar().pushCritical(
+                "Traverse Plugin", f"An error occurred during import: {e}"
+            )
+
+    def _format_angle_from_decimal(self, angle_deg: float, direction_units) -> str:
+        """Format a decimal angle to string based on direction units."""
+        if direction_units == DirectionUnits.DMS:
+            deg = int(angle_deg)
+            min_float = (angle_deg - deg) * 60
+            minutes = int(min_float)
+            seconds = (min_float - minutes) * 60
+            return f"{deg}-{minutes}-{seconds:.2f}"
+        else:
+            return f"{angle_deg:.2f}"
+
+    def _calculate_radius_from_curve(
+        self,
+        measure_type: str,
+        measure_value: float,
+        angle_type: str,
+        angle_value: float,
+    ) -> float:
+        """Calculate radius from various curve measurement types."""
+        if measure_type == "R":
+            return measure_value
+        elif measure_type == "D":  # Central angle in degrees
+            angle_rad = math.radians(angle_value)
+            if angle_type == "D":
+                angle_rad = math.radians(angle_value)
+            elif angle_type == "A":
+                # Arc length given, angle given
+                arc = angle_value
+                # R = arc / angle_rad
+                pass
+            return measure_value / (2 * math.sin(angle_rad / 2))
+        elif measure_type == "C":  # Chord length
+            angle_rad = math.radians(angle_value)
+            return measure_value / (2 * math.sin(angle_rad / 2))
+        elif measure_type == "A":  # Arc length
+            angle_rad = math.radians(angle_value)
+            return measure_value / angle_rad
+        return 0.0
+
+    def _calculate_arc_length_from_curve(
+        self,
+        measure_type: str,
+        measure_value: float,
+        angle_type: str,
+        angle_value: float,
+        radius: float,
+    ) -> float:
+        """Calculate arc length from various curve measurement types."""
+        if measure_type == "A":
+            return measure_value
+        elif measure_type == "D":  # Central angle
+            angle_rad = math.radians(angle_value)
+            return radius * angle_rad
+        elif measure_type == "C":  # Chord length
+            angle_rad = math.radians(angle_value)
+            return radius * angle_rad
+        elif measure_type == "R":  # Radius (measure_value is chord or arc)
+            return measure_value  # Approximation
+        return 0.0
 
     def export_data(self):
         """
@@ -1336,9 +1423,17 @@ class traverseDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                             )
 
                             if radius != 0.0 and arc_length != 0.0:
-                                # Export as CV (Curve) type
+                                # Export as TC (Tangent Curve) type in Esri format
+                                # Calculate central angle from arc length and radius
+                                central_angle_rad = arc_length / abs(radius)
+                                central_angle_deg = math.degrees(central_angle_rad)
+
+                                # Determine turn direction (L for left/ccw, R for right/cw)
+                                turn_direction = "L" if radius < 0 else "R"
+
+                                # Export as: TC A <arc_length> D <central_angle_deg> <turn_direction>
                                 f.write(
-                                    f"CV {exported_direction_string} {radius:.6f} {arc_length:.6f}\n"
+                                    f"TC A {arc_length:.6f} D {central_angle_deg:.2f} {turn_direction}\n"
                                 )
                             else:
                                 # Export as DD (Direction-Distance) type

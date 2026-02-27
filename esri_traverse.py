@@ -337,7 +337,22 @@ class EsriTraverseParser:
         angle_str = angle_str.strip()
 
         if self.direction_units == DirectionUnits.DMS:
-            return self._parse_dms(angle_str)
+            try:
+                # First, try to parse as strict DMS
+                return self._parse_dms(angle_str)
+            except ValueError:
+                # If DMS fails, try to parse as a float (decimal degrees) as a fallback
+                try:
+                    angle_val = float(angle_str)
+                    self.warnings.append(
+                        f"Expected DMS format but received decimal value '{angle_str}'. Treating as decimal degrees."
+                    )
+                    return angle_val
+                except ValueError:
+                    # If it's not valid DMS and not a valid float, raise the original format error
+                    raise ValueError(
+                        f"Invalid DMS format: '{angle_str}'. Expected DD-MM-SS or a valid decimal value."
+                    )
         elif self.direction_units == DirectionUnits.DD:
             return float(angle_str)
         elif self.direction_units == DirectionUnits.R:
@@ -349,22 +364,25 @@ class EsriTraverseParser:
 
     def _parse_dms(self, dms_str: str) -> float:
         """
-        Parse degrees-minutes-seconds string (e.g., '45-30-15').
+        Parse degrees-minutes-seconds string (e.g., '45-30-15', '90.5', '90-30').
 
         Returns:
             Decimal degrees
         """
-        parts = dms_str.split("-")
-        if len(parts) != 3:
-            raise ValueError(f"Invalid DMS format: {dms_str}. Expected: DD-MM-SS")
+        parts = dms_str.replace("-", " ").split()
+        if not (1 <= len(parts) <= 3):
+            raise ValueError(f"Invalid DMS format: {dms_str}. Expected 1 to 3 parts.")
 
         try:
-            degrees = float(parts[0])
-            minutes = float(parts[1])
-            seconds = float(parts[2])
+            degrees = float(parts[0]) if len(parts) > 0 else 0.0
+            minutes = float(parts[1]) if len(parts) > 1 else 0.0
+            seconds = float(parts[2]) if len(parts) > 2 else 0.0
 
-            return degrees + minutes / 60.0 + seconds / 3600.0
-        except ValueError:
+            # Handle negative degrees correctly
+            if degrees < 0:
+                return degrees - (minutes / 60.0) - (seconds / 3600.0)
+            return degrees + (minutes / 60.0) + (seconds / 3600.0)
+        except (ValueError, IndexError):
             raise ValueError(f"Invalid numeric values in DMS: {dms_str}")
 
 
